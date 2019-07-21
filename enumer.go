@@ -123,7 +123,7 @@ func (s %[1]s) MarshalBSONValue() (bsontype.Type, []byte, error) {
 func (s *%[1]s) UnmarshalBSONValue(bsonType bsontype.Type, data []byte) error {
 	bsonString, _, enough := bsoncore.ReadString(data)
 	if !enough {
-		return errors.New("not enough bytes to read")
+		return fmt.Errorf("not enough bytes to read, got %%s", data)
 	}
 
 	var err error
