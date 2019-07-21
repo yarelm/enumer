@@ -113,6 +113,31 @@ func (g *Generator) buildJSONMethods(runs [][]Value, typeName string, runsThresh
 
 // Arguments to format are:
 //	[1]: type name
+const bsonMethods = `
+// MarshalBSONValue implements the bson.ValueMarshaler interface for %[1]s
+func (s %[1]s) MarshalBSONValue() (bsontype.Type, []byte, error) {
+	return bsontype.String, bsoncore.AppendString(nil, s.String()), nil
+}
+
+// UnmarshalBSONValue implements the bson.ValueUnmarshaler interface for %[1]s
+func (s *%[1]s) UnmarshalBSONValue(bsonType bsontype.Type, data []byte) error {
+	bsonString, _, enough := bsoncore.ReadString(data)
+	if !enough {
+		return errors.New("not enough bytes to read")
+	}
+
+	var err error
+	*s, err = %[1]sString(bsonString)
+	return err
+}
+`
+
+func (g *Generator) buildMongoBSONMethods(runs [][]Value, typeName string, runsThreshold int) {
+	g.Printf(bsonMethods, typeName)
+}
+
+// Arguments to format are:
+//	[1]: type name
 const textMethods = `
 // MarshalText implements the encoding.TextMarshaler interface for %[1]s
 func (i %[1]s) MarshalText() ([]byte, error) {
